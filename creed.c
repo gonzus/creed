@@ -31,7 +31,7 @@ int main(int argc, char **argv)
             break;
         }
 
-        tb_select_input_mode(TB_INPUT_ESC | TB_INPUT_MOUSE);
+        tb_select_input_mode(TB_INPUT_ALT | TB_INPUT_MOUSE);
 
         int done = 0;
         struct tb_event ev;
