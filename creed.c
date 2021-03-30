@@ -27,7 +27,12 @@ static void dispatch_key_press(struct tb_event *ev)
             break;
 
         default:
-            line.ch[line.len++] = ev->ch;
+            for (int j = line.len; j != line.caret; --j) {
+                line.ch[j] = line.ch[j-1];
+                tb_change_cell(j, 0, line.ch[j], TB_WHITE, TB_RED);
+            }
+            ++line.len;
+            line.ch[line.caret] = ev->ch;
             tb_change_cell(line.caret, 0, ev->ch, TB_WHITE, TB_RED);
             ++line.caret;
     }
@@ -84,7 +89,8 @@ int main(int argc, char **argv)
 
     printf("Line: %d chars, ", line.len);
     for (int j = 0; j < line.len; ++j) {
-        printf("%c%x", j == 0 ? '[' : ':', line.ch[j]);
+        char c = (char) line.ch[j]; // FIXME
+        printf("%c%c", j == 0 ? '[' : ':', isprint(c) ? c : '.');
     }
     printf("], caret at %d\n", line.caret);
     return 0;
