@@ -19,6 +19,17 @@ static int should_quit(struct tb_event *ev) {
     return 0;
 }
 
+static void insert_char(char c) {
+    for (int j = line.len; j != line.caret; --j) {
+        line.ch[j] = line.ch[j-1];
+        tb_change_cell(j, 0, line.ch[j], TB_WHITE, TB_RED);
+    }
+    ++line.len;
+    line.ch[line.caret] = c;
+    tb_change_cell(line.caret, 0, c, TB_WHITE, TB_RED);
+    ++line.caret;
+}
+
 static void dispatch_key_press(struct tb_event *ev)
 {
     switch (ev->key) {
@@ -42,15 +53,22 @@ static void dispatch_key_press(struct tb_event *ev)
             line.caret = line.len;
             break;
 
-        default:
-            for (int j = line.len; j != line.caret; --j) {
-                line.ch[j] = line.ch[j-1];
-                tb_change_cell(j, 0, line.ch[j], TB_WHITE, TB_RED);
+        case TB_KEY_DELETE:
+            for (int j = line.caret; j < line.len; ++j) {
+                line.ch[j] = line.ch[j+1];
+                tb_change_cell(j, 0, line.ch[j+1], TB_WHITE, TB_RED);
             }
-            ++line.len;
-            line.ch[line.caret] = ev->ch;
-            tb_change_cell(line.caret, 0, ev->ch, TB_WHITE, TB_RED);
-            ++line.caret;
+            tb_change_cell(line.len-1, 0, ' ', TB_DEFAULT, TB_DEFAULT);
+            --line.len;
+            break;
+
+        case TB_KEY_SPACE:
+            insert_char(' ');
+            break;
+
+        default:
+            insert_char((char) ev->ch); // FIXME Unicode
+            break;
     }
     tb_set_cursor(line.caret, 0);
 }
