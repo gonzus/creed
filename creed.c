@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdio.h>
 #include <termbox.h>
 
@@ -10,6 +11,13 @@ typedef struct Line {
 } Line;
 
 static Line line;
+
+static int should_quit(struct tb_event *ev) {
+    if (ev->key == TB_KEY_ENTER) return 1;
+    if (ev->key == TB_KEY_CTRL_Q) return 1;
+    if ((ev->ch == 'q' || ev->ch == 'Q') && (ev->mod & TB_MOD_ALT)) return 1;
+    return 0;
+}
 
 static void dispatch_key_press(struct tb_event *ev)
 {
@@ -24,6 +32,14 @@ static void dispatch_key_press(struct tb_event *ev)
             if (line.caret < line.len) {
                 ++line.caret;
             }
+            break;
+
+        case TB_KEY_HOME:
+            line.caret = 0;
+            break;
+
+        case TB_KEY_END:
+            line.caret = line.len;
             break;
 
         default:
@@ -61,7 +77,7 @@ int main(int argc, char **argv)
         while (tb_poll_event(&ev)) {
             switch (ev.type) {
                 case TB_EVENT_KEY:
-                    if (ev.key == TB_KEY_CTRL_Q) {
+                    if (should_quit(&ev)) {
                         done = 1;
                         break;
                     }
@@ -89,8 +105,17 @@ int main(int argc, char **argv)
 
     printf("Line: %d chars, ", line.len);
     for (int j = 0; j < line.len; ++j) {
-        char c = (char) line.ch[j]; // FIXME
-        printf("%c%c", j == 0 ? '[' : ':', isprint(c) ? c : '.');
+        printf("%c", j == 0 ? '[' : ':');
+        if (line.ch[j] < 0xff) {
+            char c = (char) line.ch[j];
+            if (isprint(c)) {
+                printf("%c", c);
+            } else {
+                printf("%x", (uint32_t) c);
+            }
+        } else {
+            printf("%x", line.ch[j]);
+        }
     }
     printf("], caret at %d\n", line.caret);
     return 0;
