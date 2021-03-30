@@ -13,9 +13,25 @@ static Line line;
 
 static void dispatch_key_press(struct tb_event *ev)
 {
-    line.ch[line.len++] = ev->ch;
-    tb_change_cell(line.caret, 0, ev->ch, TB_WHITE, TB_RED);
-    line.caret++;
+    switch (ev->key) {
+        case TB_KEY_ARROW_LEFT:
+            if (line.caret > 0) {
+                --line.caret;
+            }
+            break;
+
+        case TB_KEY_ARROW_RIGHT:
+            if (line.caret < line.len) {
+                ++line.caret;
+            }
+            break;
+
+        default:
+            line.ch[line.len++] = ev->ch;
+            tb_change_cell(line.caret, 0, ev->ch, TB_WHITE, TB_RED);
+            ++line.caret;
+    }
+    tb_set_cursor(line.caret, 0);
 }
 
 int main(int argc, char **argv)
@@ -36,6 +52,7 @@ int main(int argc, char **argv)
         int done = 0;
         struct tb_event ev;
         tb_clear();
+        tb_set_cursor(0, 0);
         while (tb_poll_event(&ev)) {
             switch (ev.type) {
                 case TB_EVENT_KEY:
