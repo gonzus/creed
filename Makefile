@@ -1,3 +1,5 @@
+first: all
+
 NAME = creed
 
 # CFLAGS += -std=c89 -Wno-gcc-compat -Wno-comment
@@ -16,19 +18,29 @@ CFLAGS += -Wall -Wextra -Wshadow -Wpedantic
 
 LIBRARIES = -ltermbox
 
-C_EXE = $(NAME)
 
-all: $(C_EXE)
+C_SRC_MAIN = $(NAME).c
+C_SRC_LIB = \
+	line.c \
 
-C_SRC_EXE = $(NAME).c
-C_OBJ_EXE = $(C_SRC_EXE:.c=.o)
+C_OBJ_MAIN = $(C_SRC_MAIN:.c=.o)
+C_OBJ_LIB = $(C_SRC_LIB:.c=.o)
+
+C_EXE_MAIN = $(NAME)
+C_LIB_MAIN = $(NAME).a
+
+$(C_LIB_MAIN): $(C_OBJ_LIB)
+	ar -crs $@ $^
 
 %.o: %.c
 	cc $(CFLAGS) -c -o $@ $^
 
-$(C_EXE): %: %.o
+$(C_EXE_MAIN): $(C_OBJ_MAIN) $(C_LIB_MAIN)
 	cc $(CFLAGS) $(LDFLAGS) -o $@ $^ $(LIBRARIES)
 
 clean:
 	rm -f *.o
-	rm -f $(C_EXE)
+	rm -f $(C_LIB_MAIN)
+	rm -f $(C_EXE_MAIN)
+
+all: $(C_EXE_MAIN)
