@@ -42,6 +42,15 @@ static void insert_char(char c) {
     ++line.caret;
 }
 
+static void delete_char(void) {
+    for (int j = line.caret; j < line.len; ++j) {
+        line.ch[j] = line.ch[j+1];
+        tb_change_cell(j, 0, line.ch[j+1], TB_WHITE, TB_RED);
+    }
+    tb_change_cell(line.len-1, 0, ' ', TB_DEFAULT, TB_DEFAULT);
+    --line.len;
+}
+
 static bool dispatch_key_press(struct tb_event *ev)
 {
     switch (ev->key) {
@@ -70,16 +79,11 @@ static bool dispatch_key_press(struct tb_event *ev)
             break;
 
         case TB_KEY_DELETE:
-            for (int j = line.caret; j < line.len; ++j) {
-                line.ch[j] = line.ch[j+1];
-                tb_change_cell(j, 0, line.ch[j+1], TB_WHITE, TB_RED);
-            }
-            tb_change_cell(line.len-1, 0, ' ', TB_DEFAULT, TB_DEFAULT);
-            --line.len;
+            delete_char();
             break;
 
         case TB_KEY_SPACE:
-            insert_char(' ');
+            insert_char(' '); // FIXME Unicode
             break;
 
         default:
