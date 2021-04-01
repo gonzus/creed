@@ -19,14 +19,15 @@ CFLAGS += -Wall -Wextra -Wshadow -Wpedantic
 LIBRARIES = -ltermbox
 
 
-C_SRC_MAIN = $(NAME).c
+C_SRC_MAIN = $(C_EXE_MAIN).c
 C_SRC_LIB = \
 	line.c \
+	creed.c \
 
 C_OBJ_MAIN = $(C_SRC_MAIN:.c=.o)
 C_OBJ_LIB = $(C_SRC_LIB:.c=.o)
 
-C_EXE_MAIN = $(NAME)
+C_EXE_MAIN = main
 C_LIB_MAIN = $(NAME).a
 
 $(C_LIB_MAIN): $(C_OBJ_LIB)

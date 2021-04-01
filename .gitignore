@@ -2,4 +2,5 @@
 *.a
 *.so
 *.swp
-creed
+.vscode/
+main
